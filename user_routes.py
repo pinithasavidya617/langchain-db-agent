@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from api_models import UserCreate, UserResponse
+from api_models import UserCreate, UserResponse, UserUpdate
 from database_config import get_db
 from user_repository import UserRepository
 
@@ -33,3 +33,9 @@ async def get_all_users(
     user_repo = UserRepository(db)
     users = await user_repo.get_all_users(skip=skip, limit=limit)
     return users
+
+@router.put("/{user_id}")
+async def update_user( user_id:int, user_update: UserUpdate, db: AsyncSession = Depends(get_db)):
+    user_repo = UserRepository(db)
+    user = await user_repo.user_update(user_id=user_id, user_update=user_update)
+    return user

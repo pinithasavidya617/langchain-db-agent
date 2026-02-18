@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_models import UserCreate
+from api_models import UserCreate, UserUpdate
 from models import User
 
 
@@ -44,3 +44,17 @@ class UserRepository:
         await self.db.delete(user)
         await self.db.commit()
         return "User deleted successfully"
+
+    async def user_update(self, user_id: int, user_update: UserUpdate):
+        user = await self.get_user_by_id(user_id)
+
+        if not user:
+            return None
+
+        update_data = user_update.model_dump(exclude_unset=True)
+        if update_data:
+            for key, val in update_data.items():
+                setattr(user, key, val)
+            await self.db.commit()
+            await self.db.refresh(user)
+        return user
