@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -12,5 +12,24 @@ router = APIRouter(prefix="/users", tags=["Users"])
 async def create_user(user_create : UserCreate, db: AsyncSession = Depends(get_db)):
 
     user_repo = UserRepository(db)
+    existing_user = await  user_repo.get_user_by_email(user_create.email)
+    if existing_user:
+        return HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists")
     user = await user_repo.create(user_create)
     return user
+
+@router.delete("/{user_id}")
+async def delete_user( user_id:int, db: AsyncSession = Depends(get_db)):
+    user_repo = UserRepository(db)
+    user = await user_repo.delete_user(user_id)
+    return user
+
+@router.get("/")
+async def get_all_users(
+        skip :int = 0,
+        limit:int = 10,
+        db: AsyncSession = Depends(get_db)
+):
+    user_repo = UserRepository(db)
+    users = await user_repo.get_all_users(skip=skip, limit=limit)
+    return users

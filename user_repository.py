@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api_models import UserCreate
@@ -18,4 +19,28 @@ class UserRepository:
         await self.db.refresh(user)
         return user
 
-    
+    async def get_user_by_email(self, email: str) -> User | None:
+        query = select(User).where(User.email == email)
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+    async def get_all_users(self, skip: int = 0, limit: int = 20) -> list[User]:
+        query = select(User).offset(skip).limit(limit)
+        result = await self.db.execute(query)
+
+        return result.scalars().all()
+
+    async def get_user_by_id(self, id: int) -> User | None:
+         query = select(User).where(User.id == id)
+         result = await self.db.execute(query)
+         return result.scalars().first()
+
+    async def delete_user(self, user_id: int):
+        user = await self.get_user_by_id(user_id)
+
+        if not user:
+            return "User does not exists"
+
+        await self.db.delete(user)
+        await self.db.commit()
+        return "User deleted successfully"
