@@ -38,8 +38,8 @@ class InvoiceRepository:
         await self.db.commit()
         return "Invoice deleted successfully"
 
-    async def update_invoice(self, invoice_update: InvoiceUpdate):
-        invoice = await self.get_invoice_by_id(id)
+    async def update_invoice(self, invoice_id: int, invoice_update: InvoiceUpdate):
+        invoice = await self.get_invoice_by_id(invoice_id)
         if not invoice:
             return "Invoice does not exists"
 
@@ -52,5 +52,10 @@ class InvoiceRepository:
             await self.db.refresh(invoice)
         return invoice
 
+    async def get_all_invoices(self, skip: int = 0, limit: int = 20) -> list[Invoice]:
+        query = select(Invoice).offset(skip).limit(limit)
+        result = await self.db.execute(query)
+
+        return result.scalars().all()
 
 
