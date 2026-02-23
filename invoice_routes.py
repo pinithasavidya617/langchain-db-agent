@@ -37,3 +37,15 @@ async def update_user( invoice_id :int, invoice_update: InvoiceUpdate, db: Async
     if not invoice:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found")
     return invoice
+
+@router.get("/{invoice_id}", response_model=InvoiceResponse, status_code=status.HTTP_200_OK)
+async def get_invoice_by_id_router(invoice_id: int, db: AsyncSession = Depends(get_db)):
+    invoice_repo = InvoiceRepository(db)
+    invoice = await invoice_repo.get_invoice_by_id(invoice_id)
+    return invoice
+
+@router.get("/user/{user_id}", response_model=InvoiceResponse, status_code=status.HTTP_200_OK)
+async def get_invoice_by_user_id_router(user_id: int, db: AsyncSession = Depends(get_db)):
+    invoice_repo = InvoiceRepository(db)
+    invoice = await invoice_repo.get_invoice_by_user_id(user_id)
+    return invoice
