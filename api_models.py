@@ -43,3 +43,13 @@ class InvoiceResponse(InvoiceBase):
 
     class Config:
         from_attributes = True
+
+
+class QueryRequest(BaseModel):
+    query: str
+    thread_id: str
+
+class QueryResponse(BaseModel):
+    query: str
+    result: str
+    thread_id: str
